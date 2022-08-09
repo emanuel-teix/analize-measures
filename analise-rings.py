@@ -221,5 +221,5 @@ for i in delta:
 plt.yscale("log")
 plt.xscale("log")
 plt.plot(window,mean_delta)
-plt.show()
+#plt.show()
 
