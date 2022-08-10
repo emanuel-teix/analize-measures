@@ -174,7 +174,7 @@ os.system('mkdir -p %s' % path)
 #open file with input data
 #name_arq_data_in = system_type+"/"+line_splitted[1]
 name_arq_data_in = line_splitted[1]
-print(name_arq_data_in)
+#print(name_arq_data_in)
 min_imag,max_imag=imag_count(name_arq_data_in)
 #print(x)
 
@@ -213,13 +213,28 @@ for j in range(int(Number_images)):
 mean_delta=[]
 window=[]
 counter=0
+#o=open('delta.dat','w')
 for i in delta:
     counter+=1
-    print(i)
+    #print(i)
     mean_delta.append(sum(i)/len(i))
     window.append(counter)
-plt.yscale("log")
-plt.xscale("log")
+    #print(mean_delta)
+    
+    
+
+#for i in range(int(counter)):
+mean_delta_array =  np.array(mean_delta)
+o=open('delta_n15_N400_PE1_G0_p013.3_p023.3_eadh115.00_eadh225.00_eadh215.00.dat','w')
+for i in range(int(counter)):
+    print(i,mean_delta_array[i])
+    o.write("%d %f\n"%(i,mean_delta_array[i]))
+    
+    
+exit()    
+#plt.yscale("log")
+#plt.xscale("log")
+#o.write(window,mean_delta)
 plt.plot(window,mean_delta)
-#plt.show()
+plt.show()
 
