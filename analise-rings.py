@@ -64,7 +64,7 @@ def imag_count(name_arq_data_in) :
 
 def delaunay(points,max_dist):
     points=np.array(points)
-    #print(points)
+    ##print(points)
     tri = Delaunay(points)
     #print(tri.simplices)
     # x,y=[],[]
