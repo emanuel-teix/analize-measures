@@ -13,28 +13,34 @@ import time
 
 def read_data(min_imag,max_imag):
     counter = 0
-    x,y,vx,vy,nx,ny,theta = [],[],[],[],[],[],[]
-    a,b,c,d,e,f,g=[],[],[],[],[],[],[]
+    x,y,xvir,yvir,vx,vy,nx,ny,theta,color = [],[],[],[],[],[],[],[],[],[]
+    a1,a2,a3,a4,a5,a6,a7,a8,a9,a10 =[],[],[],[],[],[],[],[],[],[]
     with open(name_arq_data_in, 'r') as infile:
         for line in infile:
             if line.startswith("#"):
                 if line.split()[0] != "#IND" :
                     counter+=1
                     if min_imag < counter <= max_imag:
-                        x.append(a),y.append(b),vx.append(c),vy.append(d),nx.append(e),ny.append(f),theta.append(g)
-                        a,b,c,d,e,f,g=[],[],[],[],[],[],[]
+                        x.append(a1),y.append(a2),xvir.append(a3),yvir.append(a4),vx.append(a5),vy.append(a6),nx.append(a7),ny.append(a8),theta.append(a9),color.append(a10)
+                        a1,a2,a3,a4,a5,a6,a7,a8,a9,a10 =[],[],[],[],[],[],[],[],[],[]
             else:
                 if min_imag <= counter <= max_imag :
                     lineread=list(map(float,line.split()))
-                    a.append(lineread[1])
-                    b.append(lineread[2])
-                    c.append(lineread[3])
-                    d.append(lineread[4])            
-                    e.append(lineread[5])
-                    f.append(lineread[6])            
-                    g.append(lineread[7])
-    x.append(a),y.append(b),vx.append(c),vy.append(d),nx.append(e),ny.append(f),theta.append(g)
-    return x,y,vx,vy,nx,ny,theta
+                    a1.append(lineread[1])
+                    a2.append(lineread[2])
+                    a3.append(lineread[3])
+                    a4.append(lineread[4])            
+                    a5.append(lineread[5])
+                    a6.append(lineread[6])            
+                    a7.append(lineread[7])
+                    a8.append(lineread[8])
+                    a9.append(lineread[9])
+                    a10.append(lineread[10])
+                    
+                    
+                    
+    x.append(a1),y.append(a2),xvir.append(a3),yvir.append(a4),vx.append(a5),vy.append(a6),nx.append(a7),ny.append(a8),theta.append(a9),color.append(a10)
+    return x,y,xvir,yvir,vx,vy,nx,ny,theta,color
             
 
 
@@ -174,12 +180,26 @@ os.system('mkdir -p %s' % path)
 #open file with input data
 #name_arq_data_in = system_type+"/"+line_splitted[1]
 name_arq_data_in = line_splitted[1]
-#print(name_arq_data_in)
-min_imag,max_imag=imag_count(name_arq_data_in)
-#print(x)
+line = file_input_parameter.readline()
+if not line:
+    print("Need to know total number of images. Proceeding to counting...")
+    min_imag,max_imag=imag_count(name_arq_data_in)
+    file_input_parameter.close()
+    file_input_parameter = open("parameter.in","a")
+    file_input_parameter.write("%d %d\n"%(min_imag,max_imag))
+    print(min_imag,max_imag)
+    exit()
+try:
+    zzz = int(line.split()[0])
+except IndexError:
+    print("\nYou don't have integers on the second line of file parameter.in.\nYou probably have to erase white lines at the end of this file. \nExiting..\n")
+    exit()
+
+min_imag,max_imag = int(line.split()[0]),int(line.split()[1])
+
 
 #reading all variables in the time interval of interest
-x,y,vx,vy,nx,ny,theta=read_data(min_imag,max_imag)
+x,y,xvir,yvir,vx,vy,nx,ny,theta,color=read_data(min_imag,max_imag)
 #print(x)
 #analising...
 global_list_neigh=[]
@@ -225,9 +245,9 @@ for i in delta:
 
 #for i in range(int(counter)):
 mean_delta_array =  np.array(mean_delta)
-o=open('delta_n15_N400_PE1_G0_p013.3_p023.3_eadh115.00_eadh225.00_eadh215.00.dat','w')
+o=open('delta_n15_N400_PE1_G0_p013.4_p023.4_eadh115.00_eadh225.00_eadh215.00.dat','w')
 for i in range(int(counter)):
-    print(i,mean_delta_array[i])
+    #print(i,mean_delta_array[i])
     o.write("%d %f\n"%(i,mean_delta_array[i]))
     
     
@@ -235,6 +255,6 @@ exit()
 #plt.yscale("log")
 #plt.xscale("log")
 #o.write(window,mean_delta)
-#plt.plot(window,mean_delta)
-#plt.show()
+plt.plot(window,mean_delta)
+plt.show()
 
