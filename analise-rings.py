@@ -8,10 +8,10 @@ import numpy as np
 #matplotlib.use('TkAgg')
 import matplotlib.pyplot as plt
 #from matplotlib.patches import Ellipse
-from matplotlib import collections as mc
+#from matplotlib import collections as mc
 import time
 
-def read_data(min_imag,max_imag):
+def read_data(min_imag,max_imag,skip_images):
     counter = 0
     x,y,xvir,yvir,vx,vy,nx,ny,theta,color = [],[],[],[],[],[],[],[],[],[]
     a1,a2,a3,a4,a5,a6,a7,a8,a9,a10 =[],[],[],[],[],[],[],[],[],[]
@@ -20,11 +20,12 @@ def read_data(min_imag,max_imag):
             if line.startswith("#"):
                 if line.split()[0] != "#IND" :
                     counter+=1
-                    if min_imag < counter <= max_imag:
+                    if min_imag < counter <= max_imag and (counter-min_imag)%skip_images == 1:
+                        #print(counter,counter-min_imag)
                         x.append(a1),y.append(a2),xvir.append(a3),yvir.append(a4),vx.append(a5),vy.append(a6),nx.append(a7),ny.append(a8),theta.append(a9),color.append(a10)
                         a1,a2,a3,a4,a5,a6,a7,a8,a9,a10 =[],[],[],[],[],[],[],[],[],[]
             else:
-                if min_imag <= counter <= max_imag :
+                if min_imag <= counter <= max_imag and (counter-min_imag)%skip_images == 0 :
                     lineread=list(map(float,line.split()))
                     a1.append(lineread[1])
                     a2.append(lineread[2])
@@ -36,7 +37,6 @@ def read_data(min_imag,max_imag):
                     a8.append(lineread[8])
                     a9.append(lineread[9])
                     a10.append(lineread[10])
-                    
                     
                     
     x.append(a1),y.append(a2),xvir.append(a3),yvir.append(a4),vx.append(a5),vy.append(a6),nx.append(a7),ny.append(a8),theta.append(a9),color.append(a10)
@@ -59,8 +59,10 @@ def imag_count(name_arq_data_in) :
     if max_imag > counter :
         print("You cannot use  a final image greater than the total number of images. Exiting...")
         exit()
-
-    return min_imag,max_imag
+    print("Image interval to skip  (min=1, max=",counter,")" )
+    line_splitted        = sys.stdin.readline().split()
+    skip_images = int(line_splitted[0])
+    return min_imag,max_imag,skip_images
 
 def delaunay(points,max_dist):
     points=np.array(points)
@@ -181,26 +183,28 @@ os.system('mkdir -p %s' % path)
 #name_arq_data_in = system_type+"/"+line_splitted[1]
 name_arq_data_in = line_splitted[1]
 line = file_input_parameter.readline()
-if not line:
+if not line:  #if you find an empty line after de first proceed to imag_count
     print("Need to know total number of images. Proceeding to counting...")
-    min_imag,max_imag=imag_count(name_arq_data_in)
+    min_imag,max_imag,skip_images=imag_count(name_arq_data_in)
     file_input_parameter.close()
     file_input_parameter = open("parameter.in","a")
-    file_input_parameter.write("%d %d\n"%(min_imag,max_imag))
-    print(min_imag,max_imag)
+    file_input_parameter.write("%d %d %d\n"%(min_imag,max_imag,skip_images))
+    print("init_imag=%d, end_imag=%d, interval=%d\n"%(min_imag,max_imag,skip_images))
+    print("Now you will want to run the programm again.\n")
     exit()
-try:
+try: #if you find something after de first line which is not an integer programm exits
     zzz = int(line.split()[0])
 except IndexError:
     print("\nYou don't have integers on the second line of file parameter.in.\nYou probably have to erase white lines at the end of this file. \nExiting..\n")
     exit()
 
-min_imag,max_imag = int(line.split()[0]),int(line.split()[1])
+#reading parameter.in once more, now with image limits and number of images to skip each reading
+min_imag,max_imag,skip_images = int(line.split()[0]),int(line.split()[1]),int(line.split()[2])
 
 
 #reading all variables in the time interval of interest
-x,y,xvir,yvir,vx,vy,nx,ny,theta,color=read_data(min_imag,max_imag)
-#print(x)
+x,y,xvir,yvir,vx,vy,nx,ny,theta,color=read_data(min_imag,max_imag,skip_images)
+print("Finished reading input data")
 #analising...
 global_list_neigh=[]
 for i in range(len(x)): #i is the image index
@@ -218,7 +222,7 @@ for i in range(len(x)): #i is the image index
     #exit()
 
 #print(len(global_list_neigh))
-
+print("Finished finding neighbors")
 Number_images = len(x)
 delta=[]
 for j in range(int(Number_images)):
@@ -230,6 +234,7 @@ for j in range(int(Number_images)):
                 delta_aux.append(len(set(global_list_neigh[i][k]) & set(global_list_neigh[i+j][k]))/len(global_list_neigh[i][k]))
         delta_janela.append(sum(delta_aux)/len(delta_aux))
     delta.append(delta_janela)
+print("Finished calculating delta")
 mean_delta=[]
 window=[]
 counter=0
@@ -238,23 +243,18 @@ for i in delta:
     counter+=1
     #print(i)
     mean_delta.append(sum(i)/len(i))
-    window.append(counter)
-    #print(mean_delta)
+    window.append(counter*skip_images)
+    #print(counter*skip_images,mean_delta)
     
+output_file="delta_"+name_arq_data_in
+o=open(output_file,'w')
+for i,w in enumerate(mean_delta) :
+    o.write("%d %f\n"%((i+1)*skip_images,w))
     
 
-#for i in range(int(counter)):
-mean_delta_array =  np.array(mean_delta)
-o=open('delta_n15_N400_PE1_G0_p013.4_p023.4_eadh115.00_eadh225.00_eadh215.00.dat','w')
-for i in range(int(counter)):
-    #print(i,mean_delta_array[i])
-    o.write("%d %f\n"%(i,mean_delta_array[i]))
     
-    
-exit()    
 #plt.yscale("log")
 #plt.xscale("log")
-#o.write(window,mean_delta)
-#plt.plot(window,mean_delta)
+#plt.scatter(window,mean_delta)
 #plt.show()
 
