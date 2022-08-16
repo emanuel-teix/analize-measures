@@ -255,6 +255,6 @@ exit()
 #plt.yscale("log")
 #plt.xscale("log")
 #o.write(window,mean_delta)
-plt.plot(window,mean_delta)
-plt.show()
+#plt.plot(window,mean_delta)
+#plt.show()
 
