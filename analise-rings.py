@@ -13,7 +13,6 @@ import time
 
 def read_data(min_imag,max_imag):
     counter = 0
-    h = 2
     x,y,vx,vy,nx,ny,theta = [],[],[],[],[],[],[]
     a,b,c,d,e,f,g=[],[],[],[],[],[],[]
     with open(name_arq_data_in, 'r') as infile:
@@ -236,6 +235,6 @@ exit()
 #plt.yscale("log")
 #plt.xscale("log")
 #o.write(window,mean_delta)
-plt.plot(window,mean_delta)
-plt.show()
+#plt.plot(window,mean_delta)
+#plt.show()
 
